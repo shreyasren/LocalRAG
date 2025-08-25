@@ -1,0 +1,25 @@
+# Core AI/ML dependencies
+sentence-transformers>=2.2.2
+chromadb>=0.4.22
+torch>=2.0.0
+transformers>=4.30.0
+numpy>=1.24.3
+tqdm>=4.66.1
+
+# OCR dependencies for rotated text
+pytesseract>=0.3.10
+pdf2image>=1.16.3
+PyMuPDF>=1.23.8
+Pillow>=10.1.0
+
+# Document processing
+langchain>=0.1.0
+
+# Optional: For better PDF handling
+pypdf>=3.17.4
+
+# Optional: For Ollama integration
+requests>=2.31.0
+
+# Utilities
+pathlib2>=2.3.7
