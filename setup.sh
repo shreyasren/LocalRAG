@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# Local Document Q&A System - Automated Setup Script
+# LocalRAG - Automated Setup Script
+# Tested and verified on macOS with Python 3.13.5
 # Supports Ubuntu/Debian, macOS, and provides instructions for Windows
 
 set -e
 
 echo "======================================"
-echo "Local Document Q&A System Setup"
+echo "LocalRAG - Enhanced Document Q&A Setup"
 echo "======================================"
 echo ""
 
@@ -90,39 +91,14 @@ install_python_deps() {
     echo "📚 Installing Python dependencies..."
     echo "This may take a few minutes..."
     
-    # Create requirements.txt if it doesn't exist
-    cat > requirements_local.txt << 'EOF'
-# Core dependencies
-sentence-transformers==2.2.2
-chromadb==0.4.22
-torch>=2.0.0
-transformers==4.36.0
-tqdm==4.66.1
-
-# OCR dependencies for rotated text
-pytesseract==0.3.10
-pdf2image==1.16.3
-PyMuPDF==1.23.8
-Pillow==10.1.0
-
-# Document processing
-langchain==0.1.0
-numpy==1.24.3
-
-# Optional: For better PDF handling
-pypdf==3.17.4
-
-# Optional: For Ollama integration
-requests==2.31.0
-EOF
-    
-    pip install -r requirements_local.txt
+    # Install dependencies from local-requirements.txt
+    pip install -r local-requirements.txt
     
     echo "✅ Python dependencies installed"
     echo ""
 }
 
-# Install Ollama
+# Install Ollama (optional)
 install_ollama() {
     echo "🤖 Setting up Ollama for local LLM..."
     
@@ -152,7 +128,7 @@ install_ollama() {
     echo "1) llama3.2 (3B parameters, ~2GB download, needs 4GB RAM)"
     echo "2) phi3 (3.8B parameters, ~2.3GB download, needs 4GB RAM)"
     echo "3) mistral (7B parameters, ~4GB download, needs 8GB RAM)"
-    echo "4) Skip (use HuggingFace models instead)"
+    echo "4) Skip (use Transformer models instead - recommended for testing)"
     echo ""
     read -p "Enter choice (1-4): " model_choice
     
@@ -170,7 +146,7 @@ install_ollama() {
             ollama pull mistral
             ;;
         4)
-            echo "Skipping Ollama model download"
+            echo "Skipping Ollama model download - using Transformer models"
             ;;
         *)
             echo "Invalid choice, skipping model download"
@@ -192,11 +168,18 @@ test_installation() {
         echo "❌ Tesseract not found"
     fi
     
+    # Activate venv for testing
+    source venv/bin/activate
+    
     # Test Python packages
     python3 -c "import sentence_transformers; print('✅ Sentence Transformers installed')" 2>/dev/null || echo "❌ Sentence Transformers not installed"
     python3 -c "import chromadb; print('✅ ChromaDB installed')" 2>/dev/null || echo "❌ ChromaDB not installed"
     python3 -c "import pytesseract; print('✅ PyTesseract installed')" 2>/dev/null || echo "❌ PyTesseract not installed"
-    python3 -c "import torch; print(f'✅ PyTorch installed (GPU: {torch.cuda.is_available()})')" 2>/dev/null || echo "❌ PyTorch not installed"
+    python3 -c "import torch; print(f'✅ PyTorch installed')" 2>/dev/null || echo "❌ PyTorch not installed"
+    python3 -c "import fitz; print('✅ PyMuPDF installed')" 2>/dev/null || echo "❌ PyMuPDF not installed"
+    
+    # Test main script
+    python3 doc-qa-local.py --help > /dev/null 2>&1 && echo "✅ Main script working" || echo "❌ Main script has issues"
     
     # Test Ollama
     if command_exists ollama; then
@@ -209,65 +192,91 @@ test_installation() {
     echo ""
 }
 
-# Create example script
-create_example_script() {
-    echo "📝 Creating example usage script..."
+# Create example usage guide
+create_usage_guide() {
+    echo "📝 Creating usage examples..."
     
-    cat > run_example.sh << 'EOF'
-#!/bin/bash
+    cat > QUICK_START.md << 'EOF'
+# LocalRAG Quick Start Guide
 
-# Activate virtual environment
+## ✅ System Ready!
+
+Your LocalRAG system is installed and ready to use.
+
+## 🚀 Quick Commands
+
+### 1. Activate Environment
+```bash
 source venv/bin/activate
+```
 
-# Example commands
-echo "Example Usage Commands:"
-echo ""
-echo "1. Process a document with OCR (handles rotated pages):"
-echo "   python local_vectorizer.py process --document your_document.pdf"
-echo ""
-echo "2. Process without OCR (faster):"
-echo "   python local_vectorizer.py process --document your_document.pdf --no-ocr"
-echo ""
-echo "3. Start Q&A session:"
-echo "   python local_vectorizer.py query"
-echo ""
-echo "4. Process with custom settings:"
-echo "   python local_vectorizer.py process --document doc.pdf --chunk-size 1500 --chunk-overlap 300"
-echo ""
+### 2. Process a Document
+```bash
+# Basic processing (always use --cpu on macOS)
+python doc-qa-local.py process --document your_document.pdf --cpu
 
-# Check if user wants to process a document
-read -p "Do you have a document to process now? (y/n): " process_now
+# For technical documents (recommended)
+python doc-qa-local.py process --document technical_manual.pdf --cpu
+```
 
-if [ "$process_now" == "y" ] || [ "$process_now" == "Y" ]; then
-    read -p "Enter the path to your document: " doc_path
-    
-    if [ -f "$doc_path" ]; then
-        echo "Processing document..."
-        python local_vectorizer.py process --document "$doc_path"
-        
-        echo ""
-        read -p "Document processed! Start Q&A session now? (y/n): " start_qa
-        
-        if [ "$start_qa" == "y" ] || [ "$start_qa" == "Y" ]; then
-            python local_vectorizer.py query
-        fi
-    else
-        echo "File not found: $doc_path"
-    fi
-fi
+### 3. Query Documents
+```bash
+# Start interactive Q&A
+python doc-qa-local.py query --cpu
+
+# Use comprehensive mode for detailed answers
+python doc-qa-local.py query --cpu --comprehensive
+```
+
+## 📊 Example Session
+
+```bash
+# Process test document
+python doc-qa-local.py process --document test_document.txt --cpu
+
+# Start Q&A
+python doc-qa-local.py query --cpu
+
+# Example interaction:
+📝 Your Question: What is machine learning?
+📚 ANSWER: Machine learning (ML) is a method of data analysis...
+```
+
+## ⚠️ Important Notes
+
+- **Always use `--cpu` flag on macOS** to avoid GPU errors
+- **First run downloads models** - this may take time
+- **Large documents** may take 10-30 minutes to process
+- **Memory usage**: 2-8GB RAM depending on document size
+
+## 🆘 If Something Goes Wrong
+
+```bash
+# Check if main script works
+python doc-qa-local.py --help
+
+# Reinstall dependencies if needed
+pip install -r local-requirements.txt
+
+# For PyMuPDF issues
+pip install PyMuPDF --no-deps
+```
+
+## 📚 More Information
+
+See README.md for complete documentation and troubleshooting.
 EOF
     
-    chmod +x run_example.sh
-    echo "✅ Created run_example.sh"
+    echo "✅ Created QUICK_START.md"
     echo ""
 }
 
 # Main installation flow
 main() {
-    echo "This script will set up the Local Document Q&A System"
+    echo "This script will set up the LocalRAG Enhanced Document Q&A System"
     echo "It will install:"
     echo "  - Tesseract OCR (for handling rotated text)"
-    echo "  - Python dependencies"
+    echo "  - Python dependencies (sentence-transformers, ChromaDB, etc.)"
     echo "  - Ollama (optional, for local LLM)"
     echo ""
     read -p "Continue with installation? (y/n): " confirm
@@ -285,34 +294,36 @@ main() {
     install_python_deps
     
     # Ask about Ollama
-    echo "Ollama provides the best quality local LLM responses."
+    echo "Ollama provides high-quality local LLM responses."
+    echo "Note: The system works great with built-in Transformer models too!"
     read -p "Install Ollama? (y/n): " install_ollama_choice
     
     if [ "$install_ollama_choice" == "y" ] || [ "$install_ollama_choice" == "Y" ]; then
         install_ollama
     else
-        echo "Skipping Ollama installation. You can use HuggingFace models instead."
+        echo "Skipping Ollama installation. You can use Transformer models (recommended for testing)."
     fi
     
     # Test installation
     test_installation
     
-    # Create example script
-    create_example_script
+    # Create usage guide
+    create_usage_guide
     
     # Final instructions
     echo "======================================"
-    echo "✅ Installation Complete!"
+    echo "✅ LocalRAG Installation Complete!"
     echo "======================================"
     echo ""
-    echo "To get started:"
-    echo "1. Activate the virtual environment: source venv/bin/activate"
-    echo "2. Process a document: python local_vectorizer.py process --document your_doc.pdf"
-    echo "3. Ask questions: python local_vectorizer.py query"
+    echo "🚀 To get started:"
+    echo "1. Activate environment: source venv/bin/activate"
+    echo "2. Process a document: python doc-qa-local.py process --document your_doc.pdf --cpu"
+    echo "3. Ask questions: python doc-qa-local.py query --cpu"
     echo ""
-    echo "Or run: ./run_example.sh for guided usage"
+    echo "📖 Quick reference: cat QUICK_START.md"
+    echo "📚 Full documentation: cat README.md"
     echo ""
-    echo "For more options, see: python local_vectorizer.py --help"
+    echo "⚠️  Remember: Always use --cpu flag on macOS!"
     echo ""
 }
 

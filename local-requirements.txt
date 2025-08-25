@@ -1,4 +1,7 @@
-# Core AI/ML dependencies
+# LocalRAG Dependencies - Tested & Working Configuration
+# Last tested: August 25, 2025 on macOS with Python 3.13.5
+
+# Core AI/ML dependencies (successfully tested)
 sentence-transformers>=2.2.2
 chromadb>=0.4.22
 torch>=2.0.0
@@ -6,20 +9,26 @@ transformers>=4.30.0
 numpy>=1.24.3
 tqdm>=4.66.1
 
-# OCR dependencies for rotated text
-pytesseract>=0.3.10
-pdf2image>=1.16.3
-PyMuPDF>=1.23.8
-Pillow>=10.1.0
+# PDF and document processing (verified working)
+PyMuPDF>=1.26.4                # Successfully installed via pre-compiled wheel
+pypdf>=3.17.4                  # Alternative PDF processing
+Pillow>=10.1.0                 # Image processing
 
-# Document processing
-langchain>=0.1.0
+# OCR dependencies for rotated text (tested)
+pytesseract>=0.3.10            # Tesseract Python wrapper
+pdf2image>=1.16.3              # PDF to image conversion
 
-# Optional: For better PDF handling
-pypdf>=3.17.4
+# Document processing utilities
+langchain>=0.1.0               # Document loading and chunking
+langchain-community>=0.1.0     # Additional document loaders
 
-# Optional: For Ollama integration
+# HTTP requests (for potential Ollama integration)
 requests>=2.31.0
 
-# Utilities
-pathlib2>=2.3.7
+# System and utility libraries
+pathlib2>=2.3.7               # Path handling utilities
+
+# Note: Install system dependencies separately:
+# macOS: brew install tesseract poppler
+# Ubuntu: sudo apt-get install tesseract-ocr poppler-utils
+# Windows: Download from official sources and add to PATH
