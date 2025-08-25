@@ -195,12 +195,12 @@ The LocalRAG system has been fully tested and validated with:
 
 First, vectorize your document (one-time setup per document):
 
-**Basic Processing (Recommended):**
+**Basic Processing (Standard Chunking):**
 ```bash
-python doc-qa-local.py process --document your_document.pdf --cpu
+python doc-qa-local.py process --document your_document.pdf --cpu --no-enhanced
 ```
 
-**Enhanced Processing for Technical Documents:**
+**Enhanced Processing for Technical Documents (Recommended):**
 ```bash
 python doc-qa-local.py process --document technical_manual.pdf --cpu
 ```
@@ -213,6 +213,11 @@ python doc-qa-local.py process --document technical_manual.pdf --cpu
 - `--embedding-model all-MiniLM-L6-v2`: Embedding model (default: all-MiniLM-L6-v2)
 - `--no-ocr`: Disable OCR for faster processing (skip if document is rotated)
 - `--no-enhanced`: Disable enhanced technical document processing (use basic chunking)
+
+**📋 Key Differences:**
+- **Enhanced Processing (Default)**: Uses smart chunking optimized for technical documents, better signal/component recognition
+- **Basic Processing (--no-enhanced)**: Uses standard text chunking, faster but less optimized for technical content
+- **Enhanced processing is recommended** for technical manuals, specifications, and complex documents
 
 **✅ Example (Successfully Tested):**
 ```bash
